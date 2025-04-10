@@ -4,14 +4,8 @@ import { auth } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
 
-interface RouteParams {
-    params: {
-        entryId: string;
-    };
-}
-
 // DELETE /api/entries/[entryId]
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(request: Request, { params }: { params: { entryId: string } }) {
     const { userId } = await auth();
     const { entryId } = params;
 
