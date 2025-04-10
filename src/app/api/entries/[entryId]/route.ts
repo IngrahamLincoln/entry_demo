@@ -4,13 +4,20 @@ import { auth } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
 
+// Define the context type explicitly
+type DeleteContext = {
+    params: {
+        entryId: string;
+    };
+};
+
 // DELETE /api/entries/[entryId] - Delete an entry (Admin only)
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { entryId: string } }
+    context: DeleteContext // Use the explicit type
 ) {
     const { userId } = await auth();
-    const { entryId } = params;
+    const { entryId } = context.params; // Access via context.params
 
     if (!userId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
