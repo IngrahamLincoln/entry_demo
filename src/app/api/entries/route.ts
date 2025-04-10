@@ -5,7 +5,7 @@ import { auth } from '@clerk/nextjs/server';
 const prisma = new PrismaClient();
 
 // GET /api/entries - Fetch all entries
-export async function GET(_request: Request) {
+export async function GET() {
     // TODO: Add sorting logic based on request.url query params (?sort=new or ?sort=top)
     try {
         const entries = await prisma.entry.findMany({
