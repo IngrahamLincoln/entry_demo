@@ -13,19 +13,26 @@ const prisma = new PrismaClient();
 
 // POST /api/entries/[entryId]/upvote - Toggle upvote for an entry
 export async function POST(
-    request: NextRequest,
-    { params }: { params: { entryId: string } } // Keep destructuring, remove explicit context type, let TS infer
+    request: NextRequest
+    // Removed second parameter: { params }: { params: { entryId: string } }
 ) {
-    // const { params } = context; // Remove this if using direct destructuring in signature
+    // Manually extract entryId from the URL path
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split('/');
+    // Expected path: /api/entries/[entryId]/upvote
+    // The entryId should be the second-to-last segment
+    const entryId = pathSegments.length >= 3 ? pathSegments[pathSegments.length - 2] : null;
+
     const { userId } = await auth();
-    const entryId = params.entryId; 
 
     if (!userId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     if (!entryId) {
-        return NextResponse.json({ error: 'Missing entry ID' }, { status: 400 });
+        // This check is now more critical
+        console.error("Could not extract entryId from URL:", url.pathname);
+        return NextResponse.json({ error: 'Missing or invalid entry ID in URL' }, { status: 400 });
     }
 
     try {
@@ -72,7 +79,7 @@ export async function POST(
             return NextResponse.json({ message: 'Upvote added', upvoteCount: upvoteCount }, { status: 201 });
         }
     } catch (error) {
-        console.error("Failed to toggle upvote:", error);
+        console.error("Failed to toggle upvote for entry:", entryId, error);
         if (error instanceof Error && 'code' in error && error.code === 'P2003') { 
             return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
         }
