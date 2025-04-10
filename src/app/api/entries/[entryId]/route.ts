@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@/generated/prisma';
+import { PrismaClient, Prisma } from '@/generated/prisma';
 import { auth } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
@@ -33,14 +33,17 @@ export async function DELETE(request: Request, { params }: RouteParams) {
         });
         console.log(`Admin user ${userId} deleted entry ${entryId}`);
         return NextResponse.json({ message: 'Entry deleted successfully' }, { status: 200 });
-    } catch (error: any) {
+    } catch (error: unknown) {
         // Handle cases where the entry might not be found (Prisma throws an error)
-        // P2025: Record to delete does not exist.
-        if (error.code === 'P2025') {
-            console.error(`Admin user ${userId} failed to delete non-existent entry ${entryId}`);
-            return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
+        // Check if it's a known Prisma error before accessing code
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            // P2025: Record to delete does not exist.
+            if (error.code === 'P2025') {
+                console.error(`Admin user ${userId} failed to delete non-existent entry ${entryId}`);
+                return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
+            }
         }
-        // Handle other potential errors
+        // Handle other potential errors (including non-Prisma errors or other Prisma errors)
         console.error(`Failed to delete entry ${entryId} by admin ${userId}:`, error);
         return NextResponse.json({ error: 'Failed to delete entry' }, { status: 500 });
     }
