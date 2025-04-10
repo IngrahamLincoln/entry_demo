@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@/generated/prisma';
 import { auth } from '@clerk/nextjs/server';
 
@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 // POST /api/entries/[entryId]/upvote - Toggle upvote for an entry
 export async function POST(
-    request: Request,
+    request: NextRequest,
     { params }: { params: { entryId: string } } // Revert to standard Next.js dynamic route signature
 ) {
     const { userId } = await auth();
