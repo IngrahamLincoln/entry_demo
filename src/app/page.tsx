@@ -17,7 +17,7 @@ export default function Home() {
   return (
     <>
       {/* Add the Spline Background with the correct .splinecode URL */}
-      <SplineBackground sceneUrl="https://prod.spline.design/m41M9nh0Iu3Vn725/scene.splinecode" />
+      <SplineBackground sceneUrl="https://prod.spline.design/1o4IEKLpgGI0LTAc/scene.splinecode" />
       
       <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="flex justify-end mb-8">
