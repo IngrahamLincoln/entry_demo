@@ -22,7 +22,7 @@ interface FeedItemProps {
     createdAt: string; // Prisma returns ISO string date
     author: {
       id: string;
-      // We might add author name/avatar later if fetched
+      username: string; // Add username field
     };
     _count: {
       upvotes: number;
@@ -41,7 +41,7 @@ export function FeedItem({ entry }: FeedItemProps) {
           <Badge variant="outline">{entry.tag}</Badge>
         </div>
         <CardDescription className="text-xs text-muted-foreground">
-          Posted by {entry.author.id.substring(0, 8)}... {timeAgo} {/* Show partial author ID for now */} 
+          Posted by {entry.author.username} {timeAgo}
         </CardDescription>
       </CardHeader>
       <CardContent>

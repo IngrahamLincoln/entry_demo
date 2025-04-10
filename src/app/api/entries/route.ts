@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { PrismaClient, Tag } from '@/generated/prisma'; // Use alias
-import { auth } from '@clerk/nextjs/server';
+import { auth, clerkClient } from '@clerk/nextjs/server'; // Import clerkClient and auth
+import { User } from '@clerk/backend'; // Keep User type import
 
 const prisma = new PrismaClient();
 
@@ -8,22 +9,51 @@ const prisma = new PrismaClient();
 export async function GET() {
     // TODO: Add sorting logic based on request.url query params (?sort=new or ?sort=top)
     try {
-        const entries = await prisma.entry.findMany({
+        const entriesFromDb = await prisma.entry.findMany({
             orderBy: {
                 createdAt: 'desc',
             },
             include: {
                 author: {
-                    select: { id: true }, // Select specific fields if needed
+                    select: { id: true }, // Still just need the ID from DB
                 },
                 _count: { // Include the count of upvotes
                     select: { upvotes: true },
                 },
             },
         });
-        return NextResponse.json(entries);
+
+        // --- Fetch Usernames from Clerk --- 
+        const authorIds = [...new Set(entriesFromDb.map(entry => entry.author.id))]; // Get unique author IDs
+        if (authorIds.length > 0) {
+            // Use clerkClient() pattern - await it first!
+            const client = await clerkClient(); // Await the client first
+            const clerkUsersResponse = await client.users.getUserList({ userId: authorIds }); // Then call getUserList
+            
+            // Access the user array from the .data property
+            const userMap = new Map(clerkUsersResponse.data.map((user: User) => [
+                user.id,
+                user.username || `User ${user.id.substring(5, 9)}` // Fallback if username is null
+            ]));
+
+            // Add username to each entry
+            const entriesWithUsernames = entriesFromDb.map(entry => ({
+                ...entry,
+                author: {
+                    ...entry.author,
+                    username: userMap.get(entry.author.id) || 'Unknown User' // Add username, with fallback
+                }
+            }));
+            return NextResponse.json(entriesWithUsernames);
+
+        } else {
+             // No entries found, return empty array
+            return NextResponse.json([]);
+        }
+        // --- End Fetch Usernames ---
+        
     } catch (error) {
-        console.error("Failed to fetch entries:", error);
+        console.error("Failed to fetch entries or user data:", error);
         return NextResponse.json({ error: 'Failed to fetch entries' }, { status: 500 });
     }
 }
