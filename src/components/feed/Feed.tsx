@@ -53,10 +53,6 @@ export function Feed() {
 
   const safeEntries = Array.isArray(entries) ? entries : [];
 
-  if (safeEntries.length === 0 && !isLoading) {
-    return <div className="text-center p-10 backdrop-blur-md bg-background/40 rounded-xl">No entries yet. Be the first to post!</div>;
-  }
-
   return (
     <div className="space-y-6 p-6 backdrop-blur-md bg-background/30 rounded-xl border border-white/10 shadow-xl">
       <div className="flex justify-center space-x-3 mb-6">

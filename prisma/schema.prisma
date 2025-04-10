@@ -13,27 +13,30 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Add direct URL for Prisma Accelerate
 }
 
 model User {
   id        String   @id @unique // Clerk User ID
   entries   Entry[]
   upvotes   Upvote[]
+  comments  Comment[] // Add relation to comments
   role      Role     @default(USER) // Add role field with default
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Entry {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  description String   @db.Text // Allow longer text
+  description String    @db.Text // Allow longer text
   tag         Tag
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author      User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   upvotes     Upvote[]
+  comments    Comment[] // Add relation to comments
 
   @@index([createdAt])
   @@index([authorId])
@@ -51,6 +54,24 @@ model Upvote {
   @@unique([userId, entryId]) // User can only upvote an entry once
   @@index([userId])
   @@index([entryId])
+}
+
+// New Comment model for 200-word limit comments
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.VarChar(1200) // ~200 words limit (6 chars per word average)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  entryId   String
+  entry     Entry    @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  
+  @@index([authorId])
+  @@index([entryId])
+  @@index([createdAt])
 }
 
 enum Tag {

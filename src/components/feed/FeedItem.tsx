@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"; // Import cn utility
 import { useUser } from '@clerk/nextjs'; // <-- Import useUser
 import { Button } from '@/components/ui/button'; // <-- Import Button
 import { Trash2 } from 'lucide-react'; // <-- Import Trash icon
+import { Comments } from '@/components/comment/Comments';
 // Remove useSWRConfig import if not needed elsewhere (keeping UpvoteButton might need it? Check UpvoteButton later if needed)
 // import { useSWRConfig } from 'swr'; 
 
@@ -46,14 +47,11 @@ interface FeedItemProps {
 const getTagBorderColor = (tag: Tag): string => {
     switch (tag) {
         case Tag.PROGRAM:
-            return 'border-l-[#39FF14]'; // Neon Green
+            return 'border-l-[#C87137]'; // Weathered Orange
         case Tag.EVENT:
-            return 'border-l-[#FF10F0]'; // Neon Pink
+            return 'border-l-[#AF4319]'; // Weathered Red
         case Tag.TIPS_AND_TRICKS:
-            // Using a slightly less intense blue for better readability maybe?
-            // Let's try the requested one first. 
-            return 'border-l-[#1F51FF]'; // Neon Blue (User Request)
-            // Alternative: return 'border-l-blue-500'; 
+            return 'border-l-[#D4A76A]'; // Weathered Yellow
         default:
             return 'border-l-border'; // Default border color from theme
     }
@@ -67,6 +65,7 @@ export function FeedItem({ entry }: FeedItemProps) {
     // const { mutate } = useSWRConfig(); 
     const [isDeleting, setIsDeleting] = useState(false); // <-- State for loading
     const [deleteError, setDeleteError] = useState<string | null>(null); // <-- State for error
+    const [showComments, setShowComments] = useState(false); // <-- State for showing comments
 
     const timeAgo = formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true });
     const borderColorClass = getTagBorderColor(entry.tag);
@@ -122,27 +121,45 @@ export function FeedItem({ entry }: FeedItemProps) {
             <CardContent>
                 <p className="text-sm whitespace-pre-wrap text-foreground/90">{entry.description}</p> {/* Preserve whitespace */} 
             </CardContent>
-            <CardFooter className="flex justify-end items-center gap-2 bg-background/40 backdrop-blur-sm"> {/* <-- Added items-center and gap */}
-                 {/* <-- Conditionally render Delete Button --> */}
-                {isAdmin && (
-                    <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        aria-label="Delete entry"
-                        className="bg-red-500/70 hover:bg-red-600/90 backdrop-blur-sm"
-                    >
-                        {isDeleting ? (
-                           <span className="loading loading-spinner loading-xs"></span> // Simple spinner
-                        ) : (
-                           <Trash2 className="h-4 w-4" />
-                        )}
-                    </Button>
-                )}
-                <UpvoteButton entryId={entry.id} initialCount={entry._count.upvotes} />
+            <CardFooter className="flex justify-between items-center gap-2 bg-background/40 backdrop-blur-sm"> {/* Changed to justify-between */}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowComments(!showComments)}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                    {showComments ? 'Hide Comments' : 'Show Comments'}
+                </Button>
+                
+                <div className="flex items-center gap-2">
+                    {isAdmin && (
+                        <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            aria-label="Delete entry"
+                            className="bg-red-500/70 hover:bg-red-600/90 backdrop-blur-sm"
+                        >
+                            {isDeleting ? (
+                               <span className="loading loading-spinner loading-xs"></span> // Simple spinner
+                            ) : (
+                               <Trash2 className="h-4 w-4" />
+                            )}
+                        </Button>
+                    )}
+                    <UpvoteButton entryId={entry.id} initialCount={entry._count.upvotes} />
+                </div>
             </CardFooter>
-             {/* Display error message */} 
+            
+            {/* Display comments section */}
+            {showComments && (
+                <div className="px-4 pb-4">
+                    <Comments entryId={entry.id} />
+                </div>
+            )}
+            
+            {/* Display error message */} 
             {deleteError && (
                 <CardFooter className="text-red-500 text-xs justify-end">
                     {deleteError}

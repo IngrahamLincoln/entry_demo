@@ -141,6 +141,15 @@ exports.Prisma.UpvoteScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.CommentScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  authorId: 'authorId',
+  entryId: 'entryId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -164,7 +173,8 @@ exports.Tag = exports.$Enums.Tag = {
 exports.Prisma.ModelName = {
   User: 'User',
   Entry: 'Entry',
-  Upvote: 'Upvote'
+  Upvote: 'Upvote',
+  Comment: 'Comment'
 };
 
 /**
