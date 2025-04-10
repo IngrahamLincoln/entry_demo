@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && cp node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node .next/server/",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
