@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient, Tag } from '@/generated/prisma'; // Corrected import path
+import { PrismaClient, Tag } from '@/generated/prisma'; // Use alias
 import { auth } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
