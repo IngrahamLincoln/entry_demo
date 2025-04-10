@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react'; // Import useState
 import {
     Card,
@@ -15,7 +17,11 @@ import { cn } from "@/lib/utils"; // Import cn utility
 import { useUser } from '@clerk/nextjs'; // <-- Import useUser
 import { Button } from '@/components/ui/button'; // <-- Import Button
 import { Trash2 } from 'lucide-react'; // <-- Import Trash icon
-import { useSWRConfig } from 'swr'; // <-- Import useSWRConfig
+// Remove useSWRConfig import if not needed elsewhere (keeping UpvoteButton might need it? Check UpvoteButton later if needed)
+// import { useSWRConfig } from 'swr'; 
+
+// Import the server action
+import { deleteEntryAction } from '@/app/actions'; // Adjusted path
 
 // Define the shape of the entry data we expect
 // Matches the data structure returned by our GET /api/entries endpoint
@@ -56,7 +62,8 @@ const getTagBorderColor = (tag: Tag): string => {
 // Helper function to get color based on tag
 export function FeedItem({ entry }: FeedItemProps) {
     const { user } = useUser(); // <-- Get user data from Clerk
-    const { mutate } = useSWRConfig(); // <-- Get SWR mutate function
+    // Remove mutate from useSWRConfig if SWR isn't used for feed invalidation here anymore
+    // const { mutate } = useSWRConfig(); 
     const [isDeleting, setIsDeleting] = useState(false); // <-- State for loading
     const [deleteError, setDeleteError] = useState<string | null>(null); // <-- State for error
 
@@ -66,7 +73,7 @@ export function FeedItem({ entry }: FeedItemProps) {
     // <-- Check if the user is an admin
     const isAdmin = user?.publicMetadata?.role === 'ADMIN';
 
-    // <-- Handle delete function
+    // Updated handleDelete function to use the server action
     const handleDelete = async () => {
         if (!isAdmin) return; // Extra safety check
 
@@ -74,22 +81,15 @@ export function FeedItem({ entry }: FeedItemProps) {
         setDeleteError(null);
 
         try {
-            const response = await fetch(`/api/entries/${entry.id}`, {
-                method: 'DELETE',
-            });
+            // Call the server action
+            const result = await deleteEntryAction(entry.id);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Failed to delete entry: ${response.statusText}`);
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to delete entry');
             }
 
-            console.log(`Entry ${entry.id} deleted successfully.`);
-            // Refresh the feed data by revalidating the key used by the main feed fetch
-            // Adjust '/api/entries' if your feed fetching hook uses a different key
-            mutate('/api/entries');
-             // Optional: Revalidate sorted feeds if they use different keys
-            mutate('/api/entries?sort=new'); 
-            mutate('/api/entries?sort=top');
+            console.log(`Entry ${entry.id} deleted successfully via action.`);
+            // No need for manual mutation, revalidatePath handles it
 
         } catch (error: unknown) {
             console.error("Deletion failed:", error);
