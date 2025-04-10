@@ -9,8 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter, // Added for potential close button
-  DialogClose, // Added for explicit close
 } from "@/components/ui/dialog"
 import { CreateEntryForm } from "./CreateEntryForm"
 import { PlusCircle } from 'lucide-react';
@@ -46,14 +44,6 @@ export function CreateEntryDialog({ onEntryCreated }: CreateEntryDialogProps) {
         <div className="py-4">
           <CreateEntryForm onSuccess={handleSuccess} />
         </div>
-        {/* Optional: Add an explicit close button in the footer */}
-        {/* <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary">
-              Cancel
-            </Button>
-          </DialogClose>
-        </DialogFooter> */}
       </DialogContent>
     </Dialog>
   )
