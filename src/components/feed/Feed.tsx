@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import useSWR from 'swr';
 import { FeedItem } from './FeedItem';
 import { Tag } from "@/generated/prisma"; 
+import { Button } from "@/components/ui/button";
 
 // Define the structure of the data expected from the API
 // This should match the structure defined in FeedItemProps
@@ -21,49 +23,58 @@ interface ApiEntry {
     };
 }
 
+// Define the fetcher function for useSWR
+const fetcher = async (url: string): Promise<ApiEntry[]> => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    const errorInfo = await response.json().catch(() => ({})); // Try to get error details
+    throw new Error(`HTTP error! status: ${response.status}, message: ${errorInfo.error || 'Failed to fetch'}`);
+  }
+  return response.json();
+};
+
 export function Feed() {
-  const [entries, setEntries] = useState<ApiEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<'new' | 'top'>('new');
 
-  useEffect(() => {
-    const fetchEntries = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/entries'); // Fetches using default sorting (newest first)
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data: ApiEntry[] = await response.json();
-        setEntries(data);
-      } catch (err) {
-        console.error("Failed to fetch entries:", err);
-        setError(err instanceof Error ? err.message : 'An unknown error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchEntries();
-  }, []); // Empty dependency array means this runs once on mount
+  // Use useSWR for data fetching
+  const { data: entries, error, isLoading } = useSWR<ApiEntry[]>(
+    `/api/entries?sort=${sortOrder}`,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
   if (isLoading) {
     return <div className="text-center p-10">Loading feed...</div>;
   }
 
   if (error) {
-    return <div className="text-center p-10 text-red-500">Error loading feed: {error}</div>;
+    return <div className="text-center p-10 text-red-500">Error loading feed: {error.message}</div>;
   }
 
-  if (entries.length === 0) {
+  const safeEntries = Array.isArray(entries) ? entries : [];
+
+  if (safeEntries.length === 0 && !isLoading) {
     return <div className="text-center p-10">No entries yet. Be the first to post!</div>;
   }
 
   return (
     <div className="space-y-4 p-4">
-      {/* TODO: Add sorting controls here in Phase 4 */}
-      {entries.map((entry) => (
+      <div className="flex justify-center space-x-2 mb-4">
+        <Button 
+          variant={sortOrder === 'new' ? 'secondary' : 'outline'}
+          onClick={() => setSortOrder('new')}
+        >
+          New
+        </Button>
+        <Button 
+          variant={sortOrder === 'top' ? 'secondary' : 'outline'}
+          onClick={() => setSortOrder('top')}
+        >
+          Top
+        </Button>
+      </div>
+
+      {safeEntries.map((entry) => (
         <FeedItem key={entry.id} entry={entry} />
       ))}
     </div>

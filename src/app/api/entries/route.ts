@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient, Tag } from '@/generated/prisma'; // Use alias
 import { auth, clerkClient } from '@clerk/nextjs/server'; // Import clerkClient and auth
 import { User } from '@clerk/backend'; // Keep User type import
@@ -6,13 +6,25 @@ import { User } from '@clerk/backend'; // Keep User type import
 const prisma = new PrismaClient();
 
 // GET /api/entries - Fetch all entries
-export async function GET() {
+export async function GET(request: NextRequest) {
     // TODO: Add sorting logic based on request.url query params (?sort=new or ?sort=top)
+    const url = new URL(request.url);
+    const sort = url.searchParams.get('sort') || 'new'; // Default to 'new'
+
+    let orderByClause: any = { createdAt: 'desc' }; // Default sorting
+
+    if (sort === 'top') {
+        orderByClause = { 
+            upvotes: { 
+                _count: 'desc' 
+            } 
+        }; // Sort by upvote count
+    } 
+    // No need for explicit 'new' case, it's the default
+
     try {
         const entriesFromDb = await prisma.entry.findMany({
-            orderBy: {
-                createdAt: 'desc',
-            },
+            orderBy: orderByClause, // Use the dynamic orderBy clause
             include: {
                 author: {
                     select: { id: true }, // Still just need the ID from DB
