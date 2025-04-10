@@ -16,10 +16,10 @@ export default function Home() {
 
   return (
     <>
-      {/* Add the Spline Background with the correct .splinecode URL */}
-      <SplineBackground sceneUrl="https://prod.spline.design/1o4IEKLpgGI0LTAc/scene.splinecode" />
+      {/* Add the Spline Background with the updated scene URL */}
+      <SplineBackground sceneUrl="https://prod.spline.design/eoNe6cXjwNmnQJsa/scene.splinecode" />
       
-      <div className="container mx-auto px-4 py-8 relative z-10">
+      <div className="w-full md:w-1/2 px-4 py-8 relative z-10">
         <div className="flex justify-end mb-8">
           <CreateEntryDialog onEntryCreated={handleEntryCreated} />
         </div>
