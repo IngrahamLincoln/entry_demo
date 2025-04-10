@@ -1,6 +1,6 @@
 import { prisma } from "../../../lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 
 // GET handler to fetch comments for a specific entry
 export async function GET(request: NextRequest) {
