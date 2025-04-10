@@ -62,6 +62,7 @@ const getTagBorderColor = (tag: Tag): string => {
 // Helper function to get color based on tag
 export function FeedItem({ entry }: FeedItemProps) {
     const { user } = useUser(); // <-- Get user data from Clerk
+    console.log('FeedItem - User Object:', user); // <-- ADD THIS LINE
     // Remove mutate from useSWRConfig if SWR isn't used for feed invalidation here anymore
     // const { mutate } = useSWRConfig(); 
     const [isDeleting, setIsDeleting] = useState(false); // <-- State for loading
