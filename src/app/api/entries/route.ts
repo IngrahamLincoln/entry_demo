@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PrismaClient, Tag, Role } from '@/generated/prisma'; // Use alias, Add Role
 import { auth, clerkClient } from '@clerk/nextjs/server'; // Import clerkClient and auth
 import { User } from '@clerk/backend'; // Keep User type import

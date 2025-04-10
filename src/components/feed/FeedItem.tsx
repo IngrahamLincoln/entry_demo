@@ -91,9 +91,14 @@ export function FeedItem({ entry }: FeedItemProps) {
             mutate('/api/entries?sort=new'); 
             mutate('/api/entries?sort=top');
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Deletion failed:", error);
-            setDeleteError(error.message || 'An unknown error occurred during deletion.');
+            // Check if error is an instance of Error to safely access message
+            let errorMessage = 'An unknown error occurred during deletion.';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setDeleteError(errorMessage);
         } finally {
             setIsDeleting(false);
         }

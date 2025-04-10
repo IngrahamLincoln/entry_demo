@@ -42,11 +42,17 @@ export async function DELETE(
         console.log(`Admin user ${userId} deleted entry ${entryId}`);
         return NextResponse.json({ message: 'Entry deleted successfully' }, { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        // Need to check if error is an object with a 'code' property
+        let errorCode: string | undefined;
+        if (typeof error === 'object' && error !== null && 'code' in error) {
+            errorCode = (error as { code: string }).code;
+        }
+
         console.error(`Failed to delete entry ${entryId} by admin ${userId}:`, error);
 
         // Handle case where the entry doesn't exist (Prisma P2025)
-        if (error.code === 'P2025') {
+        if (errorCode === 'P2025') {
              return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
         }
 
