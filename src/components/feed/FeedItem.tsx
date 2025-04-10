@@ -11,6 +11,10 @@ import { UpvoteButton } from "./UpvoteButton"
 import { Tag } from "@/generated/prisma"; // Import Tag enum
 import { formatDistanceToNow } from 'date-fns'; // For relative timestamps
 import { cn } from "@/lib/utils"; // Import cn utility
+import { useUser } from "@clerk/nextjs"; // Import useUser
+import { useSWRConfig } from 'swr'; // Import useSWRConfig
+import { Button } from "@/components/ui/button"; // Import Button if not already there
+import { Trash2 } from 'lucide-react'; // Icon for delete button
 
 // Define the shape of the entry data we expect
 // Matches the data structure returned by our GET /api/entries endpoint
@@ -52,6 +56,43 @@ const getTagBorderColor = (tag: Tag): string => {
 export function FeedItem({ entry }: FeedItemProps) {
   const timeAgo = formatDistanceToNow(new Date(entry.createdAt), { addSuffix: true });
   const borderColorClass = getTagBorderColor(entry.tag);
+  const { user } = useUser(); // Get current user
+  const { mutate } = useSWRConfig(); // Get SWR mutate function
+
+  // Check if the current user is the admin
+  const isAdmin = user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
+
+  // Function to handle delete action
+  const handleDelete = async () => {
+    if (!isAdmin) return; // Extra check
+
+    // Optional: Add a confirmation dialog
+    // if (!confirm("Are you sure you want to delete this entry?")) {
+    //   return;
+    // }
+
+    try {
+      const response = await fetch(`/api/entries/${entry.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to delete entry');
+      }
+
+      // Revalidate the feed data after successful deletion
+      // This will find all SWR keys starting with '/api/entries' and revalidate them
+      await mutate((key) => typeof key === 'string' && key.startsWith('/api/entries'), undefined, { revalidate: true });
+      // Optional: Show a success toast message here
+      console.log(`Entry ${entry.id} deleted successfully.`);
+
+    } catch (error) {
+      console.error("Delete failed:", error);
+      // Optional: Show an error toast message here
+      alert(`Error deleting entry: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
 
   return (
     <Card className={cn(
@@ -70,7 +111,18 @@ export function FeedItem({ entry }: FeedItemProps) {
       <CardContent>
         <p className="text-sm whitespace-pre-wrap">{entry.description}</p> {/* Preserve whitespace */} 
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end items-center space-x-2"> {/* Adjust layout */} 
+        {/* Conditionally render Delete Button for Admin */}
+        {isAdmin && (
+          <Button 
+            variant="destructive"
+            size="icon"
+            onClick={handleDelete}
+            aria-label="Delete entry"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
         <UpvoteButton entryId={entry.id} initialCount={entry._count.upvotes} />
       </CardFooter>
     </Card>
