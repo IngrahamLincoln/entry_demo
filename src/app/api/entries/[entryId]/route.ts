@@ -1,11 +1,11 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { PrismaClient, Prisma } from '@/generated/prisma';
 import { auth } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
 
 // DELETE /api/entries/[entryId]
-export async function DELETE(request: Request, { params }: { params: { entryId: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { entryId: string } }) {
     const { userId } = await auth();
     const { entryId } = params;
 
