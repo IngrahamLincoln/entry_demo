@@ -30,14 +30,17 @@ export function CreateEntryDialog({ onEntryCreated }: CreateEntryDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button 
+          variant="outline" 
+          className="bg-background/60 backdrop-blur-md border border-white/20 hover:bg-background/80 shadow-lg transition-all duration-300"
+        >
           <PlusCircle className="mr-2 h-4 w-4" /> Create New Entry
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-card/90 backdrop-blur-md">
+      <DialogContent className="sm:max-w-[425px] bg-background/70 backdrop-blur-xl border border-white/20 shadow-xl">
         <DialogHeader>
-          <DialogTitle>Create New Entry</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-primary text-xl">Create New Entry</DialogTitle>
+          <DialogDescription className="text-muted-foreground/90">
             Share a program, event, or tip with the community.
           </DialogDescription>
         </DialogHeader>

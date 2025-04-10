@@ -107,22 +107,22 @@ export function FeedItem({ entry }: FeedItemProps) {
 
     return (
         <Card className={cn(
-            "w-full max-w-2xl mx-auto overflow-hidden bg-card/80 backdrop-blur-sm border border-border/50 border-l-4",
+            "w-full max-w-2xl mx-auto overflow-hidden bg-background/60 backdrop-blur-md border border-white/10 border-l-4 shadow-lg transition-all duration-300 hover:bg-background/70",
             borderColorClass
         )}>
             <CardHeader>
                 <div className="flex justify-between items-start mb-2">
-                    <CardTitle>{entry.title}</CardTitle>
-                    <Badge variant="outline">{entry.tag}</Badge>
+                    <CardTitle className="text-xl font-bold text-primary">{entry.title}</CardTitle>
+                    <Badge variant="outline" className="backdrop-blur-sm bg-secondary/30">{entry.tag}</Badge>
                 </div>
                 <CardDescription className="text-xs text-muted-foreground">
                     Posted by {entry.author.username} {timeAgo}
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-sm whitespace-pre-wrap">{entry.description}</p> {/* Preserve whitespace */} 
+                <p className="text-sm whitespace-pre-wrap text-foreground/90">{entry.description}</p> {/* Preserve whitespace */} 
             </CardContent>
-            <CardFooter className="flex justify-end items-center gap-2"> {/* <-- Added items-center and gap */}
+            <CardFooter className="flex justify-end items-center gap-2 bg-background/40 backdrop-blur-sm"> {/* <-- Added items-center and gap */}
                  {/* <-- Conditionally render Delete Button --> */}
                 {isAdmin && (
                     <Button
@@ -131,6 +131,7 @@ export function FeedItem({ entry }: FeedItemProps) {
                         onClick={handleDelete}
                         disabled={isDeleting}
                         aria-label="Delete entry"
+                        className="bg-red-500/70 hover:bg-red-600/90 backdrop-blur-sm"
                     >
                         {isDeleting ? (
                            <span className="loading loading-spinner loading-xs"></span> // Simple spinner

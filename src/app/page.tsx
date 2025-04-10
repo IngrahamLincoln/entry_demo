@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Feed } from "@/components/feed/Feed";
 import { CreateEntryDialog } from "@/components/entry/CreateEntryDialog";
+import { SplineBackground } from "@/components/spline/SplineBackground";
 
 export default function Home() {
   // State to potentially trigger feed refresh (simple approach for now)
@@ -14,13 +15,18 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-end mb-6">
-        <CreateEntryDialog onEntryCreated={handleEntryCreated} />
-      </div>
+    <>
+      {/* Add the Spline Background with the correct .splinecode URL */}
+      <SplineBackground sceneUrl="https://prod.spline.design/m41M9nh0Iu3Vn725/scene.splinecode" />
       
-      {/* Pass the key to the Feed component */}
-      <Feed key={feedKey} /> 
-    </div>
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        <div className="flex justify-end mb-8">
+          <CreateEntryDialog onEntryCreated={handleEntryCreated} />
+        </div>
+        
+        {/* Pass the key to the Feed component */}
+        <Feed key={feedKey} /> 
+      </div>
+    </>
   );
 }
