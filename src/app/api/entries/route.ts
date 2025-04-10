@@ -5,13 +5,19 @@ import { User } from '@clerk/backend'; // Keep User type import
 
 const prisma = new PrismaClient();
 
+// Define the type for the orderBy clause
+type EntryOrderBy =
+  | { createdAt: 'desc' }
+  | { upvotes: { _count: 'desc' } };
+
 // GET /api/entries - Fetch all entries
 export async function GET(request: NextRequest) {
     // TODO: Add sorting logic based on request.url query params (?sort=new or ?sort=top)
     const url = new URL(request.url);
     const sort = url.searchParams.get('sort') || 'new'; // Default to 'new'
 
-    let orderByClause: any = { createdAt: 'desc' }; // Default sorting
+    // Use the specific type instead of any
+    let orderByClause: EntryOrderBy = { createdAt: 'desc' }; // Default sorting
 
     if (sort === 'top') {
         orderByClause = { 
