@@ -7,10 +7,10 @@ const prisma = new PrismaClient();
 // DELETE /api/entries/[entryId] - Delete an entry (Admin only)
 export async function DELETE(
     request: NextRequest,
-    context: { params: { entryId: string } }
+    { params }: { params: { entryId: string } }
 ) {
     const { userId } = await auth();
-    const { entryId } = context.params;
+    const { entryId } = params;
 
     if (!userId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
