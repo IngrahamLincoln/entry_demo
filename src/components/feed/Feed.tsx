@@ -14,6 +14,7 @@ interface ApiEntry {
     createdAt: string; 
     author: {
       id: string;
+      username: string;
     };
     _count: {
       upvotes: number;
