@@ -4,13 +4,20 @@ import { auth } from '@clerk/nextjs/server';
 
 const prisma = new PrismaClient();
 
+// Define the expected shape of the context object containing params
+interface RouteContext {
+  params: {
+    entryId: string;
+  };
+}
+
 // POST /api/entries/[entryId]/upvote - Toggle upvote for an entry
 export async function POST(
     request: Request,
-    { params }: { params: { entryId: string } }
+    context: RouteContext // Use the defined interface for the second argument
 ) {
     const { userId } = await auth();
-    const entryId = params.entryId;
+    const entryId = context.params.entryId; // Access entryId via context.params
 
     if (!userId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
