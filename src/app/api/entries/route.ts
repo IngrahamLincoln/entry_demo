@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient, Tag } from '@/generated/prisma'; // Use alias
+import { PrismaClient, Tag, Role } from '@/generated/prisma'; // Use alias, Add Role
 import { auth, clerkClient } from '@clerk/nextjs/server'; // Import clerkClient and auth
 import { User } from '@clerk/backend'; // Keep User type import
 
@@ -92,14 +92,41 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields or invalid tag' }, { status: 400 });
         }
 
-        // --- User Sync --- 
+        // --- User Sync ---
         // Ensure the user exists in our database before creating an entry
         await prisma.user.upsert({
             where: { id: userId },
             update: {}, // No update needed if user exists
-            create: { id: userId }, // Create user if they don't exist
+            create: { id: userId }, // Create user if they don't exist (defaults to USER role)
         });
-        // --- End User Sync --- 
+
+        // --- Fetch User Role & Update Clerk Metadata ---
+        // Get the user's role from our database (could be newly created USER or existing ADMIN/USER)
+        const dbUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { role: true },
+        });
+
+        if (!dbUser) {
+            // This should theoretically not happen after upsert, but handle defensively
+            console.error(`User ${userId} not found in DB after upsert during entry creation.`);
+            // Don't fail the whole request, but log the issue. Metadata won't be updated.
+        } else {
+            try {
+                 // Use await with clerkClient()
+                const client = await clerkClient(); // Await the client first
+                await client.users.updateUserMetadata(userId, {
+                    publicMetadata: {
+                        role: dbUser.role, // Store the role (e.g., 'ADMIN' or 'USER')
+                    },
+                });
+                console.log(`Synced role ${dbUser.role} to Clerk publicMetadata for user ${userId}`);
+            } catch (clerkError) {
+                console.error(`Failed to update Clerk metadata for user ${userId}:`, clerkError);
+                // Again, don't necessarily fail the request, but log the error.
+            }
+        }
+        // --- End User Sync & Metadata Update ---
 
         const newEntry = await prisma.entry.create({
             data: {

@@ -18,6 +18,7 @@ model User {
   id        String   @id @unique // Clerk User ID
   entries   Entry[]
   upvotes   Upvote[]
+  role      Role     @default(USER) // Add role field with default
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -55,4 +56,10 @@ enum Tag {
   PROGRAM
   EVENT
   TIPS_AND_TRICKS
+}
+
+// Add the Role enum
+enum Role {
+  USER
+  ADMIN
 }

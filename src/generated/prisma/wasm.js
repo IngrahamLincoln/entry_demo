@@ -119,6 +119,7 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
+  role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -149,6 +150,11 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
+exports.Role = exports.$Enums.Role = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+};
+
 exports.Tag = exports.$Enums.Tag = {
   PROGRAM: 'PROGRAM',
   EVENT: 'EVENT',
